@@ -4,27 +4,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.example.stopwatch.interactor.StopwatchStateOrchestrator
+import com.example.stopwatch.model.data.entity.Timer
 
 class StopwatchViewModel(
     private val stopwatchStateOrchestrator: StopwatchStateOrchestrator = StopwatchStateOrchestrator()
 ) : ViewModel() {
 
-    val tickerLiveData: LiveData<String> = stopwatchStateOrchestrator.ticker.asLiveData()
+    val listLiveData: Map<Timer,LiveData<String>> = createListLiveData()
 
-    fun onStart() {
-        stopwatchStateOrchestrator.start()
+    private fun createListLiveData(): Map<Timer,LiveData<String>> {
+       val listLiveData = mutableMapOf<Timer,LiveData<String>>()
+        stopwatchStateOrchestrator.getListTicker().forEach {
+            listLiveData[it.key] = it.value.asLiveData()
+        }
+       return listLiveData
     }
 
-    fun onPause() {
-        stopwatchStateOrchestrator.pause()
+    fun onStart(timer: Timer) {
+        stopwatchStateOrchestrator.start(timer)
     }
 
-    fun onStop() {
-        stopwatchStateOrchestrator.stop()
+    fun onPause(timer: Timer) {
+        stopwatchStateOrchestrator.pause(timer)
     }
 
-    fun onReset() {
-        stopwatchStateOrchestrator.clearValue()
+    fun onStop(timer: Timer) {
+        stopwatchStateOrchestrator.stop(timer)
+    }
+
+    fun onReset(timer: Timer) {
+        stopwatchStateOrchestrator.clearValue(timer)
     }
 
 }

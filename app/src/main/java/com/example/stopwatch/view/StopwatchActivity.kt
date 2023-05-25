@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.stopwatch.R
 import com.example.stopwatch.databinding.ActivityStopwatchBinding
+import com.example.stopwatch.databinding.StopwatchViewBinding
+import com.example.stopwatch.model.data.entity.Timer
 import com.example.stopwatch.utils.TimestampMillisecondsFormatter
 import com.example.stopwatch.viewModel.StopwatchViewModel
 
@@ -23,49 +25,61 @@ class StopwatchActivity : AppCompatActivity() {
         setContentView(binding.root)
         initView(savedInstanceState)
 
-        stopwatchViewModel.tickerLiveData.observe(this){
-            renderData(it)
+        stopwatchViewModel.listLiveData.forEach {
+            it.value.observe(this) { textTime ->
+                renderData(it.key, textTime)
+            }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        // сохраняем состояние buttonStartReset (если reset)
-        if (binding.buttonStartReset.text==getString(R.string.reset))
-            outState.putCharSequence(KEY_RESET, binding.buttonStartReset.text)
+        // сохраняем состояние buttonStartReset
+        outState.putCharSequenceArrayList(
+            KEY_STATE_START_RESET,
+            arrayListOf(binding.firstStopwatchView.buttonStartReset.text,
+            binding.secondStopwatchView.buttonStartReset.text)
+        )
         super.onSaveInstanceState(outState)
     }
 
-    private fun renderData(textTime: String) {
-        binding.textTime.text = textTime
-    }
-
-    private fun initView(savedInstanceState: Bundle?) {
-        binding.run {
-            // восстанавливаем состояние buttonStartReset
-            savedInstanceState?.let{
-                if (it.getCharSequence(KEY_RESET)==getString(R.string.reset))
-                    buttonStartReset.text = getString(R.string.reset)
-            }
-            buttonStartReset.setOnClickListener {
-                if (buttonStartReset.text == getString(R.string.reset)){
-                    buttonStartReset.text = getString(R.string.start)
-                    stopwatchViewModel.onReset()
-                } else
-                    stopwatchViewModel.onStart()
-            }
-            buttonPause.setOnClickListener {
-                stopwatchViewModel.onPause()
-            }
-            buttonStop.setOnClickListener {
-                stopwatchViewModel.onStop()
-                if(textTime.text!=TimestampMillisecondsFormatter.DEFAULT_TIME)
-                    buttonStartReset.text = getString(R.string.reset)
-            }
+    private fun renderData(timer: Timer, textTime: String) {
+        when (timer) {
+            Timer.FIRST -> binding.firstStopwatchView.textTime.text = textTime
+            Timer.SECOND -> binding.secondStopwatchView.textTime.text = textTime
         }
     }
 
-    companion object{
-        private const val KEY_RESET = "KeyReset"
+    private fun initView(savedInstanceState: Bundle?) {
+        // восстанавливаем состояние buttonStartReset
+        savedInstanceState?.getCharSequenceArrayList(KEY_STATE_START_RESET).let {
+            binding.firstStopwatchView.buttonStartReset.text = it?.get(0) ?: getString(R.string.start)
+            binding.secondStopwatchView.buttonStartReset.text = it?.get(1) ?: getString(R.string.start)
+        }
+
+        binding.firstStopwatchView.initStopwatchView(Timer.FIRST)
+        binding.secondStopwatchView.initStopwatchView(Timer.SECOND)
+    }
+
+    private fun StopwatchViewBinding.initStopwatchView(timer: Timer) {
+        buttonStartReset.setOnClickListener {
+            if (buttonStartReset.text == getString(R.string.reset)) {
+                buttonStartReset.text = getString(R.string.start)
+                stopwatchViewModel.onReset(timer)
+            } else
+                stopwatchViewModel.onStart(timer)
+        }
+        buttonPause.setOnClickListener {
+            stopwatchViewModel.onPause(timer)
+        }
+        buttonStop.setOnClickListener {
+            stopwatchViewModel.onStop(timer)
+            if (textTime.text != TimestampMillisecondsFormatter.DEFAULT_TIME)
+                buttonStartReset.text = getString(R.string.reset)
+        }
+    }
+
+    companion object {
+        private const val KEY_STATE_START_RESET = "KeyStateStartReset"
     }
 
 }

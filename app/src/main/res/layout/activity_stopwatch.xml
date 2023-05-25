@@ -6,43 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".view.StopwatchActivity">
 
-    <TextView
-        android:id="@+id/text_time"
-        android:layout_width="wrap_content"
+    <include
+        android:id="@+id/first_stopwatch_view"
+        layout="@layout/stopwatch_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="@string/default_time"
-        android:textColor="@color/black"
-        android:textSize="45sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button_start_reset"
-        android:layout_width="wrap_content"
+    <include
+        android:id="@+id/second_stopwatch_view"
+        layout="@layout/stopwatch_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:text="@string/start"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_time" />
+        app:layout_constraintTop_toBottomOf="@id/first_stopwatch_view" />
 
-    <Button
-        android:id="@+id/button_pause"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/pause"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/button_start_reset" />
-
-    <Button
-        android:id="@+id/button_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
-        android:text="@string/stop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/button_start_reset" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
